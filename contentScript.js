@@ -10,6 +10,6 @@ script.onload = function () {
 
 // listen to event from injected script in page context
 document.addEventListener('swReadyEvent', function (event) {
-  console.log('#### |||| **** event has landed in content script')
-  console.log(`received e.detail: ${event.detail}`)
+  chrome.runtime.sendMessage({ type: 'scriptURL', scriptURL: event.detail })
+  console.log(`received scriptURL: ${event.detail}`)
 })

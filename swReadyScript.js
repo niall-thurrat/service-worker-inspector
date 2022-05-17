@@ -7,6 +7,7 @@
   navigator.serviceWorker.ready
     .then(swReg => {
       console.log('**** **** **** **** THE SEVICEWORKER.READY FIRED!')
-      document.dispatchEvent(new CustomEvent('swReadyEvent', { detail: swReg.scope }))
+      const scriptURL = swReg.active.scriptURL
+      document.dispatchEvent(new CustomEvent('swReadyEvent', { detail: scriptURL }))
     })
 })()
