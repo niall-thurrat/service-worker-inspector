@@ -40,7 +40,6 @@ function getRequestsFromStorage (initiator) {
 }
 
 function addRequestUrlToStorageRequests (storageReqs, reqInitiator, reqUrl) {
-  console.log('REQUESTS EXIST!!!')
   if (!storageReqs.urls.includes(reqUrl)) {
     storageReqs.urls.push(reqUrl)
     chrome.storage.local.set({ [reqInitiator]: storageReqs })
@@ -48,7 +47,6 @@ function addRequestUrlToStorageRequests (storageReqs, reqInitiator, reqUrl) {
 }
 
 function setNewStorageRequest (reqInitiator, reqUrl) {
-  console.log('NO REQUESTS!!!')
   const req = {
     [reqInitiator]: {
       urls: [reqUrl]
