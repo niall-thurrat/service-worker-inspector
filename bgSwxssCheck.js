@@ -1,8 +1,9 @@
 chrome.runtime.onMessage.addListener(
-  function (request, sender) {
+  async function (request, sender) {
     if (request.type === 'scriptUrl') {
       const scriptUrl = (new URL(request.scriptUrl))
-      doSwxssCheck(scriptUrl)
+      await doSwxssCheck(scriptUrl)
+      sendCheckDoneMessage()
     }
     return true
   }
@@ -32,6 +33,10 @@ async function doSwxssCheck (url) {
   //   console.log('----')
   // })
   // chrome.storage.local.clear()
+}
+
+function sendCheckDoneMessage () {
+  chrome.runtime.sendMessage({ type: 'checkDone' })
 }
 
 function getUrlsFromParams (params) {
@@ -95,13 +100,14 @@ function setReport (initiator, storageReqs, report) {
 }
 
 function updateReport (report, newCheck) {
-  return report.checks.map(check => {
+  report.checks.map(check => {
     if (check.type === 'sw-xss') {
       return newCheck
     } else {
       return check
     }
   })
+  return report
 }
 
 function createNewReport (check) {
