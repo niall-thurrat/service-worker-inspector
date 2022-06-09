@@ -55,12 +55,60 @@ function setNewStorageRequest (reqInitiator, reqUrl) {
   chrome.storage.local.set(req)
 }
 
-// TODO: add listener for swUrlFound message from contentscript, then:
-//   - inspect SW url for a URL query parameter
-//   - extract URL query parameter
-//   - inspect storage to see if extracted URL is used as a 'requestUrl' to request a 'script' resource
-//   - positive/negative results stored in report object for current domain
-//   - previous report objects deleted
+chrome.runtime.onMessage.addListener(
+  async function (request, sender) {
+    if (request.type === 'scriptUrl') {
+      const url = (new URL(request.scriptUrl))
+      const params = new URLSearchParams(url.search)
+      const initiator = `${url.protocol}//${url.hostname}`
+
+      for (const param of params.values()) {
+        if (isValidHttpUrl(param)) {
+          const storageReqs = await getRequestsFromStorage(initiator)
+
+          if (storageReqs) {
+            storageReqs.urls.forEach(async (url) => {
+              const reqUrl = (new URL(url))
+              const reqDomain = `${reqUrl.protocol}//${reqUrl.hostname}`
+
+              if (param === reqDomain) {
+                const report = {
+                  checks: [{
+                    type: 'sw-xss',
+                    isPassing: false
+                  }]
+                }
+                // TODO: handle when report exists already
+                storageReqs.report = report
+
+                await chrome.storage.local.set({ [initiator]: storageReqs })
+
+                await chrome.storage.local.get(null, function (items) {
+                  console.log(`items: ${JSON.stringify(items)}`)
+                  console.log('----')
+                })
+              }
+            })
+          } // TODO: else... do I throw an error here if the initiator key not found???
+        }
+      }
+    }
+    return true
+  }
+)
+
+// credit goes to Pavlo on StackOverflow for this function
+// https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
+function isValidHttpUrl (string) {
+  let url
+
+  try {
+    url = new URL(string)
+  } catch (_) {
+    return false
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:'
+}
 
 // DELETE ME! TEST CODE FOR THESIS STATISTICS
 // (() => {
