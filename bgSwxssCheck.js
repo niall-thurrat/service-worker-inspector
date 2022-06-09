@@ -12,26 +12,25 @@ async function doSwxssCheck (url) {
   const initiator = `${url.protocol}//${url.hostname}`
   const params = new URLSearchParams(url.search)
   const paramUrls = getUrlsFromParams(params)
+  const storageReqs = await getRequestsFromStorage(initiator)
+  let isPassing = true
 
-  if (paramUrls) {
-    const storageReqs = await getRequestsFromStorage(initiator)
-
-    if (storageReqs) {
-      paramUrls.forEach(paramUrl => {
-        if (isMatchInStorage(storageReqs, paramUrl)) {
-          const report = createReport('sw-xss', false)
-          // TODO: handle if existing report with an addCheckToReport func
-          addReportToStorage(initiator, storageReqs, report)
-        }
-      })
-    } // TODO: else... handle if initiator key not found?
+  if (paramUrls && storageReqs) {
+    paramUrls.forEach(paramUrl => {
+      if (isMatchInStorage(storageReqs, paramUrl)) {
+        isPassing = false
+      }
+    })
   }
+  const check = createCheck('sw-xss', isPassing)
+  const report = createReport(initiator, storageReqs, check)
+  setReport(initiator, storageReqs, report)
 
   // DELETE - code for testing
-  await chrome.storage.local.get(null, function (items) {
-    console.log(`items: ${JSON.stringify(items)}`)
-    console.log('----')
-  })
+  // await chrome.storage.local.get(null, function (items) {
+  //   console.log(`items: ${JSON.stringify(items)}`)
+  //   console.log('----')
+  // })
   // chrome.storage.local.clear()
 }
 
@@ -65,25 +64,50 @@ async function isMatchInStorage (storageReqs, paramUrl) {
     // TODO: match more than just domains
     const reqDomain = `${reqUrl.protocol}//${reqUrl.hostname}`
 
-    if (paramUrl === reqDomain) return true
+    if (paramUrl === reqDomain) {
+      return true
+    }
   })
   return false
 }
 
-function createReport (type, result) {
-  // TODO: validation - type should be string, result should be boolean
-  const report = {
-    checks: [{
-      type,
-      isPassing: result
-    }]
+function createCheck (name, result) {
+  return {
+    type: name,
+    isPassing: result
+  }
+}
+
+function createReport (initiator, storageReqs, check) {
+  let report = storageReqs.report
+
+  if (report && report.checks) {
+    report = updateReport(report, check)
+  } else {
+    report = createNewReport(check)
   }
   return report
 }
 
-function addReportToStorage (initiator, storageReqs, report) {
+function setReport (initiator, storageReqs, report) {
   storageReqs.report = report
   chrome.storage.local.set({ [initiator]: storageReqs })
+}
+
+function updateReport (report, newCheck) {
+  return report.checks.map(check => {
+    if (check.type === 'sw-xss') {
+      return newCheck
+    } else {
+      return check
+    }
+  })
+}
+
+function createNewReport (check) {
+  return {
+    checks: [check]
+  }
 }
 
 // credit goes to Pavlo on StackOverflow for this function
