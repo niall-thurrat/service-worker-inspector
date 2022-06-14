@@ -1,22 +1,97 @@
+// TEST REPORT MODEL
+const reportModel = {
+  domain: null,
+  isSwReg: null,
+  swUrl: null,
+  isParamUrls: null,
+  paramUrls: null,
+  isDomainMatch: null,
+  reqUrls: null,
+  isTaintPassing: null
+}
+
+// TEST FUNCTION
+function sendTestReport (report) {
+  fetch('http://localhost:3000/results/eval2', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(report)
+  }).catch(err => {
+    console.error(err)
+  })
+}
+
+// TEST FUNCTION - SETTING AN INITIAL 'NO SW' REPORT HERE
+chrome.tabs.onUpdated.addListener(async function (tabId, info) {
+  if (info.status === 'complete') {
+    const url = await getCurrentDomain()
+    const noSwReport = JSON.parse(JSON.stringify(reportModel))
+    noSwReport.domain = url
+    noSwReport.isSwReg = false
+    await sendTestReport(noSwReport)
+  }
+})
+
+// TEST FUNCTION
+async function getCurrentDomain () {
+  const tabUrl = await getTabUrl()
+  const url = (new URL(tabUrl))
+  const currentDomain = `${url.protocol}//${url.hostname}`
+
+  return currentDomain
+}
+
+// TEST FUNCTION
+async function getTabUrl () {
+  const options = { active: true, lastFocusedWindow: true }
+  const [tab] = await chrome.tabs.query(options)
+
+  return await tab.url
+}
+
 chrome.runtime.onMessage.addListener(
   async function (request, sender) {
     if (request.type === 'scriptUrl') {
+      // //////// DELETE - TEST CODE - RECORD SW REG URL HERE
+      const url = await getCurrentDomain()
+      const testReport = JSON.parse(JSON.stringify(reportModel))
+      testReport.domain = url
+      testReport.isSwReg = true
+      testReport.swUrl = request.scriptUrl
+      // //////////////////////////////////////////////////////
+
       const scriptUrl = (new URL(request.scriptUrl))
-      await doSwxssCheck(scriptUrl)
+      await doSwxssCheck(scriptUrl, testReport) // DELETE testReport param
       sendCheckDoneMessage()
     }
     return true
   }
 )
 
-async function doSwxssCheck (url) {
+async function doSwxssCheck (url, testReport) { // DELETE testReport param
   const initiator = `${url.protocol}//${url.hostname}`
   const params = new URLSearchParams(url.search)
   const paramUrls = getUrlsFromParams(params)
   const storageReqs = await getRequestsFromStorage(initiator)
   let isPassing = true
 
-  if (paramUrls && storageReqs) {
+  // //////// DELETE - TEST CODE - RECORD IF URL PARAMS FOUND HERE
+  let isSent = false
+
+  if (paramUrls.length > 0) {
+    testReport.isParamUrls = true
+    testReport.paramUrls = paramUrls
+  } else {
+    testReport.isParamUrls = false
+    testReport.paramUrls = paramUrls
+    await sendTestReport(testReport)
+    isSent = true
+  }
+  // /////////////////////////////////////////////////////////////////
+
+  if (paramUrls.length > 0 && storageReqs) {
     paramUrls.forEach(paramUrl => {
       if (isMatchInStorage(storageReqs, paramUrl)) {
         isPassing = false
@@ -25,11 +100,11 @@ async function doSwxssCheck (url) {
   }
   const check = createCheck('sw-xss', isPassing)
   const report = createReport(initiator, storageReqs, check)
-  setReport(initiator, storageReqs, report)
+  setReport(initiator, storageReqs, report, testReport, isSent) // DELETE testReport, isSent params
 
   // DELETE - code for testing
   // await chrome.storage.local.get(null, function (items) {
-  //   console.log(`items: ${JSON.stringify(items)}`)
+  //   console.log(`ITEMS AFTER setReport in bgSwxssCheck: ${JSON.stringify(items)}`)
   //   console.log('----')
   // })
   // chrome.storage.local.clear()
@@ -47,7 +122,7 @@ function getUrlsFromParams (params) {
       paramUrls.push(param)
     }
   }
-  return (paramUrls === []) ? null : paramUrls
+  return paramUrls
 }
 
 function getRequestsFromStorage (initiator) {
@@ -66,7 +141,7 @@ function getRequestsFromStorage (initiator) {
 async function isMatchInStorage (storageReqs, paramUrl) {
   storageReqs.urls.forEach(async (url) => {
     const reqUrl = (new URL(url))
-    // TODO: match more than just domains
+    // TODO: match more than just protocol+host ??
     const reqDomain = `${reqUrl.protocol}//${reqUrl.hostname}`
 
     if (paramUrl === reqDomain) {
@@ -94,7 +169,14 @@ function createReport (initiator, storageReqs, check) {
   return report
 }
 
-function setReport (initiator, storageReqs, report) {
+async function setReport (initiator, storageReqs, report, testReport, isSent) { // DELETE testReport, isSent params
+  // ////// DELETE - TEST CODE - RECORD REPORT RESULT AND CHECKED REQ URLS IN STORAGE
+  if (!isSent) {
+    testReport.isDomainMatch = !(report.checks[0].isPassing)
+    testReport.reqUrls = storageReqs.urls
+    await sendTestReport(testReport)
+  }
+  // /////////////////////////////////////////////////////////////////////////
   storageReqs.report = report
   chrome.storage.local.set({ [initiator]: storageReqs })
 }
