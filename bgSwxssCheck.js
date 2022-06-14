@@ -100,13 +100,6 @@ async function doSwxssCheck (url, testReport) { // DELETE testReport param
   const check = createCheck('sw-xss', isPassing)
   const report = createReport(initiator, storageReqs, check)
   setReport(initiator, storageReqs, report, testReport, isSent) // DELETE testReport, isSent params
-
-  // DELETE - code for testing
-  // await chrome.storage.local.get(null, function (items) {
-  //   console.log(`ITEMS AFTER setReport in bgSwxssCheck: ${JSON.stringify(items)}`)
-  //   console.log('----')
-  // })
-  // chrome.storage.local.clear()
 }
 
 function sendCheckDoneMessage () {
