@@ -5,9 +5,11 @@ chrome.runtime.onMessage.addListener(
   async function (request, sender) {
     if (request.type === 'checkDone') {
       const currentDomain = await getCurrentDomain()
-      const report = await getReport(currentDomain)
+      const storageReqs = await getRequestsFromStorage(currentDomain)
+      const reportStr = createReportString(storageReqs.report)
+      cleanStorage(currentDomain, storageReqs)
 
-      reportDiv.innerHTML = report
+      reportDiv.innerHTML = reportStr
     }
   }
 )
@@ -25,12 +27,6 @@ async function getTabUrl () {
   const [tab] = await chrome.tabs.query(options)
 
   return await tab.url
-}
-
-async function getReport (domain) {
-  const storageReqs = await getRequestsFromStorage(domain)
-
-  return createReportString(storageReqs.report)
 }
 
 function getRequestsFromStorage (domain) {
@@ -52,7 +48,9 @@ function createReportString (report) {
   report.checks.forEach(check => {
     reportStr += createCheckString(check)
   })
-  return reportStr
+  return (reportStr !== '')
+    ? reportStr
+    : 'No security report found.'
 }
 
 function createCheckString (check) {
@@ -60,4 +58,9 @@ function createCheckString (check) {
   const result = (check.isPassing) ? 'pass' : 'fail'
 
   return `${name} security check: ${result}\n`
+}
+
+async function cleanStorage (currentDomain, storageReqs) {
+  await chrome.storage.local.clear()
+  chrome.storage.local.set({ [currentDomain]: storageReqs })
 }
