@@ -6,8 +6,7 @@ const reportModel = {
   isParamUrls: null,
   paramUrls: null,
   isDomainMatch: null,
-  reqUrls: null,
-  isTaintPassing: null
+  reqUrls: null
 }
 
 // TEST FUNCTION
