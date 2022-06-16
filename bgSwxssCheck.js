@@ -10,16 +10,20 @@ const reportModel = {
 }
 
 // TEST FUNCTION
-function sendTestReport (report) {
-  fetch('http://localhost:3000/results/eval2', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(report)
-  }).catch(err => {
-    console.error(err)
-  })
+async function sendTestReport (report) {
+  try { // if (report.domain !== 'chrome://extensions')
+    console.log(`FETCH report: ${JSON.stringify(report)}`)
+    const response = await fetch('http://localhost:3000/results', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(report)
+    })
+    console.log('Fetch response: ', response)
+  } catch (error) {
+    console.error('Fetch error: ', error)
+  }
 }
 
 // TEST FUNCTION - SETTING AN INITIAL 'NO SW' REPORT HERE
