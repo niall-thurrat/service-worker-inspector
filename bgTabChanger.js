@@ -19,27 +19,27 @@
     'developers.google.com',
     'codelabs.developers.google.com',
     'app.ft.com',
-    '2048-opera-pwa.surge.sh'//,
-    // 'anonace.com',
-    // 'app.destinyitemmanager.com',
-    // 'audiotube.epicweb.app',
-    // 'aurora.lunarworks.co.uk',
-    // 'beat-tap.firebaseapp.com',
-    // 'bitcoinverter.herokuapp.com',
-    // 'briefform.de',
-    // 'calculator.iondrimbafilho.me',
-    // 'calendo.dav-apps.tech',
-    // 'canvas.apps.chrome',
-    // 'coinhodler.io',
-    // 'coinranking.com',
-    // 'crossnote.app',
-    // 'deckdeckgo.app',
-    // 'encounters.heromuster.com',
-    // 'epiconlineorchestra.com',
-    // 'exiferaser.epicweb.app',
-    // 'periodic-table.io',
-    // 'soccer.coachaide.com',
-    // 'webcodeditor.netlify.app',
+    '2048-opera-pwa.surge.sh',
+    'anonace.com',
+    'app.destinyitemmanager.com',
+    'audiotube.epicweb.app',
+    'aurora.lunarworks.co.uk',
+    'beat-tap.firebaseapp.com',
+    'bitcoinverter.herokuapp.com',
+    'briefform.de',
+    'calculator.iondrimbafilho.me',
+    'calendo.dav-apps.tech',
+    'canvas.apps.chrome',
+    'coinhodler.io',
+    'coinranking.com',
+    'crossnote.app',
+    'deckdeckgo.app',
+    'encounters.heromuster.com',
+    'epiconlineorchestra.com',
+    'exiferaser.epicweb.app',
+    'periodic-table.io',
+    'soccer.coachaide.com',
+    'webcodeditor.netlify.app'//,
     // 'www.basket.se',
     // 'en.wikipedia.org',
     // 'uppsalabasket.se',
@@ -82,21 +82,18 @@
     // 'www.thefreedictionary.com'
   ]
 
-  const protocol = 'https://'
-  const changeTab = setInterval(changeTabUrl(protocol), 5000)
   let index = 0
+  const changeTab = setInterval(changeTabUrl, 6000)
 
-  async function changeTabUrl (protocol) {
+  async function changeTabUrl () {
     try {
+      const protocol = 'https://'
       const url = `${protocol}${urls[index]}/`
 
       await chrome.tabs.update({ url }, (tab) => {
-        if (tab.pendingUrl === url) {
-          index++
-        } else if (isExtensionUrl(tab.pendingUrl) && protocol === 'https://') {
-          changeTabUrl('http://')
-        } else {
-          index++
+        if (isExtensionUrl(tab.pendingUrl)) {
+          const httpUrl = `http://${urls[index]}/`
+          chrome.tabs.update({ httpUrl })
         }
       })
       index++

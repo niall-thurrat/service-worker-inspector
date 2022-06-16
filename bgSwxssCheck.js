@@ -11,16 +11,19 @@ const reportModel = {
 
 // TEST FUNCTION
 async function sendTestReport (report) {
-  try { // if (report.domain !== 'chrome://extensions')
-    console.log(`FETCH report: ${JSON.stringify(report)}`)
-    const response = await fetch('http://localhost:3000/results', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(report)
-    })
-    console.log('Fetch response: ', response)
+  try {
+    if (report.domain !== 'chrome://extensions' &&
+    report.domain !== 'https://undefined') {
+      console.log(`FETCH report: ${JSON.stringify(report)}`)
+      const response = await fetch('http://localhost:3000/results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(report)
+      })
+      console.log('Fetch response: ', response)
+    }
   } catch (error) {
     console.error('Fetch error: ', error)
   }
