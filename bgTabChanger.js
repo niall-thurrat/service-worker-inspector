@@ -14,7 +14,7 @@
     'phonograph.app',
     'llama.party',
     'forum.freecodecamp.org',
-    'drive.google.com',
+    'hightide.earth',
     'www.iheart.com/podcast',
     'developers.google.com',
     'codelabs.developers.google.com',
@@ -39,56 +39,55 @@
     'exiferaser.epicweb.app',
     'periodic-table.io',
     'soccer.coachaide.com',
-    'webcodeditor.netlify.app'//,
-    // 'www.basket.se',
-    // 'en.wikipedia.org',
-    // 'uppsalabasket.se',
-    // 'basketlandslagen.se',
-    // 'www.vibybasket.se',
-    // 'www.flashscore.se',
-    // 'www.aikbasket.se',
-    // 'stockholmbasket.se',
-    // 'www.jamtlandbasket.se',
-    // 'www.svenskalag.se',
-    // 'www.britannica.com',
-    // 'www.svt.se',
-    // 'www.ne.se',
-    // 'www.svtplay.se',
-    // 'www.newworldencyclopedia.org',
-    // 'www.lg.com',
-    // 'www.allente.se',
-    // 'www.history.com',
-    // 'www.tekniskamuseet.se',
-    // 'www.elon.edu',
-    // 'cafedelites.com',
-    // 'www.bbcgoodfood.com',
-    // 'www.healthline.com',
-    // 'www.allrecipes.com',
-    // 'foodnetwork.co.uk',
-    // 'cooking.nytimes.com',
-    // 'salmonbusiness.com',
-    // 'www.zapmeta.ws',
-    // 'zagseafood.com.au',
-    // 'www.jamieoliver.com',
-    // 'rentroutine.com',
-    // 'store.steampowered.com',
-    // 'dictionary.cambridge.org',
-    // 'www.merriam-webster.com',
-    // 'www.dictionary.com',
-    // 'www.polygon.com',
-    // 'www.collinsdictionary.com',
-    // 'www.ldoceonline.com',
-    // 'www.ign.com',
-    // 'www.thefreedictionary.com'
+    'webcodeditor.netlify.app',
+    'www.basket.se',
+    'en.wikipedia.org',
+    'uppsalabasket.se',
+    'basketlandslagen.se',
+    'www.vibybasket.se',
+    'www.flashscore.se',
+    'www.aikbasket.se',
+    'stockholmbasket.se',
+    'www.jamtlandbasket.se',
+    'www.svenskalag.se',
+    'www.britannica.com',
+    'www.svt.se',
+    'www.ne.se',
+    'www.svtplay.se',
+    'www.newworldencyclopedia.org',
+    'www.lg.com',
+    'www.allente.se',
+    'www.history.com',
+    'www.tekniskamuseet.se',
+    'www.elon.edu',
+    'cafedelites.com',
+    'www.bbcgoodfood.com',
+    'www.healthline.com',
+    'www.allrecipes.com',
+    'foodnetwork.co.uk',
+    'cooking.nytimes.com',
+    'salmonbusiness.com',
+    'www.zapmeta.ws',
+    'zagseafood.com.au',
+    'www.jamieoliver.com',
+    'rentroutine.com',
+    'store.steampowered.com',
+    'dictionary.cambridge.org',
+    'www.merriam-webster.com',
+    'www.dictionary.com',
+    'www.polygon.com',
+    'www.collinsdictionary.com',
+    'www.ldoceonline.com',
+    'www.ign.com',
+    'www.thefreedictionary.com'
   ]
 
   let index = 0
-  const changeTab = setInterval(changeTabUrl, 6000)
+  const changeTab = setInterval(changeTabUrl, 3000)
 
   async function changeTabUrl () {
     try {
-      const protocol = 'https://'
-      const url = `${protocol}${urls[index]}/`
+      const url = `https://${urls[index]}/`
 
       await chrome.tabs.update({ url }, (tab) => {
         if (isExtensionUrl(tab.pendingUrl)) {
@@ -107,6 +106,6 @@
   }
 
   function isExtensionUrl (url) {
-    return /^chrome-extension/.test(url)
+    return /^chrome/.test(url)
   }
 })()
