@@ -7,7 +7,6 @@ chrome.runtime.onMessage.addListener(
       const currentDomain = await getCurrentDomain()
       const storageReqs = await getRequestsFromStorage(currentDomain)
       const reportStr = createReportString(storageReqs.report)
-      cleanStorage(currentDomain, storageReqs)
 
       reportDiv.innerHTML = reportStr
     }
@@ -58,9 +57,4 @@ function createCheckString (check) {
   const result = (check.isPassing) ? 'pass' : 'fail'
 
   return `${name} security check: ${result}\n`
-}
-
-async function cleanStorage (currentDomain, storageReqs) {
-  await chrome.storage.local.clear()
-  chrome.storage.local.set({ [currentDomain]: storageReqs })
 }

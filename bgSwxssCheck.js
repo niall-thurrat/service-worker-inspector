@@ -12,21 +12,23 @@ const reportModel = {
 // TEST FUNCTION
 async function sendTestReport (report) {
   try {
-    if (report.domain !== 'chrome://extensions' &&
-    report.domain !== 'https://undefined') {
-      console.log(`FETCH report: ${JSON.stringify(report)}`)
-      const response = await fetch('http://localhost:3000/results', {
+    if (!isExtensionUrl(report.domain)) {
+      await fetch('http://localhost:3000/results', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(report)
       })
-      console.log('Fetch response: ', response)
     }
   } catch (error) {
     console.error('Fetch error: ', error)
   }
+}
+
+// TEST FUNCTION
+function isExtensionUrl (url) {
+  return /^chrome/.test(url)
 }
 
 // TEST FUNCTION - SETTING AN INITIAL 'NO SW' REPORT HERE
@@ -70,7 +72,7 @@ chrome.runtime.onMessage.addListener(
 
       const scriptUrl = (new URL(request.scriptUrl))
       await doSwxssCheck(scriptUrl, testReport) // DELETE testReport param
-      sendCheckDoneMessage()
+      await sendCheckDoneMessage()
     }
     return true
   }
@@ -82,6 +84,8 @@ async function doSwxssCheck (url, testReport) { // DELETE testReport param
   const paramUrls = getUrlsFromParams(params)
   const storageReqs = await getRequestsFromStorage(initiator)
   let isPassing = true
+  let check
+  let report
 
   // //////// DELETE - TEST CODE - RECORD IF URL PARAMS FOUND HERE
   let isSent = false
@@ -104,13 +108,15 @@ async function doSwxssCheck (url, testReport) { // DELETE testReport param
       }
     })
   }
-  const check = createCheck('sw-xss', isPassing)
-  const report = createReport(initiator, storageReqs, check)
+  await chrome.storage.local.clear()
+
+  check = createCheck('sw-xss', isPassing)
+  report = createReport(initiator, storageReqs, check)
   setReport(initiator, storageReqs, report, testReport, isSent) // DELETE testReport, isSent params
 }
 
-function sendCheckDoneMessage () {
-  chrome.runtime.sendMessage({ type: 'checkDone' })
+async function sendCheckDoneMessage () {
+  await chrome.runtime.sendMessage({ type: 'checkDone' })
 }
 
 function getUrlsFromParams (params) {
