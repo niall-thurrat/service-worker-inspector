@@ -21,7 +21,7 @@
     "js": ["contentScript.js"]
   }],
   "web_accessible_resources": [{
-    "resources": ["swReadyScript.js"],
+    "resources": ["swReadyScript.js", "data.csv" ],
     "matches": ["<all_urls>"]
   }],
   "action": {
