@@ -84,8 +84,6 @@ async function doSwxssCheck (url, testReport) { // DELETE testReport param
   const paramUrls = getUrlsFromParams(params)
   const storageReqs = await getRequestsFromStorage(initiator)
   let isPassing = true
-  let check
-  let report
 
   // //////// DELETE - TEST CODE - RECORD IF URL PARAMS FOUND HERE
   let isSent = false
@@ -110,8 +108,8 @@ async function doSwxssCheck (url, testReport) { // DELETE testReport param
   }
   await chrome.storage.local.clear()
 
-  check = createCheck('sw-xss', isPassing)
-  report = createReport(initiator, storageReqs, check)
+  const check = createCheck('sw-xss', isPassing)
+  const report = createReport(initiator, storageReqs, check)
   setReport(initiator, storageReqs, report, testReport, isSent) // DELETE testReport, isSent params
 }
 
