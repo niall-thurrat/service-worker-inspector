@@ -12,15 +12,6 @@ chrome.webRequest.onBeforeRequest.addListener(
       } else {
         await setNewStorageRequest(reqInitiator, reqUrl)
       }
-
-      // DELETE: code used for testing
-      // await chrome.storage.local.get(null, function (items) {
-      //   console.log(`items: ${JSON.stringify(items)}`)
-      //   console.log('----')
-      // })
-      // chrome.storage.local.clear()
-
-      // TODO: clear storage items somehow to prevent reaching storage capacity
     }
   },
   { urls: ['<all_urls>'] }
