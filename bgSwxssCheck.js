@@ -23,10 +23,9 @@ async function doSwxssCheck (url) {
       }
     })
   }
-  await chrome.storage.local.clear()
-
   const check = createCheck('sw-xss', isPassing)
   const report = createReport(initiator, storageReqs, check)
+  await chrome.storage.local.clear()
   setReport(initiator, storageReqs, report)
 }
 
