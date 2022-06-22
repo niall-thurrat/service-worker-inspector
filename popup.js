@@ -1,17 +1,25 @@
+let reportDiv = document.getElementById('report')
+reportDiv.innerHTML = 'No service worker found.'
 
-const reportDiv = document.getElementById('report')
+window.onload = function() {
+  updatePopup()
+}
 
 chrome.runtime.onMessage.addListener(
   async function (request, sender) {
     if (request.type === 'checkDone') {
-      const currentDomain = await getCurrentDomain()
-      const storageReqs = await getRequestsFromStorage(currentDomain)
-      const reportStr = createReportString(storageReqs.report)
-
-      reportDiv.innerHTML = reportStr
+      updatePopup()
     }
   }
 )
+
+async function updatePopup () {
+  const currentDomain = await getCurrentDomain()
+  const storageReqs = await getRequestsFromStorage(currentDomain)
+  const reportStr = createReportString(storageReqs.report)
+
+  reportDiv.innerHTML = reportStr
+}
 
 async function getCurrentDomain () {
   const tabUrl = await getTabUrl()
